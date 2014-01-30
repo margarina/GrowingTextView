@@ -437,6 +437,20 @@
     return internalTextView.text;
 }
 
+-(void)setAttributedText:(NSAttributedString *)attributedText
+{
+    internalTextView.attributedText = attributedText;
+    
+    // include this line to analyze the height of the textview.
+    // fix from Ankit Thakur
+    [self performSelector:@selector(textViewDidChange:) withObject:internalTextView];
+}
+
+-(NSAttributedString*)attributedText
+{
+    return internalTextView.attributedText;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 -(void)setFont:(UIFont *)afont
