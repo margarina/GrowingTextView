@@ -477,6 +477,7 @@
 -(void)setAttributedText:(NSAttributedString *)attributedText
 {
     internalTextView.attributedText = attributedText;
+    internalTextView.typingAttributes = @{NSForegroundColorAttributeName:[UIColor blackColor], NSFontAttributeName:[UIFont systemFontOfSize:16]};
     
     // include this line to analyze the height of the textview.
     // fix from Ankit Thakur
