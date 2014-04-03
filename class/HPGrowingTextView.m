@@ -415,7 +415,7 @@
     
     internalTextViewFrame.origin.y = contentInset.top - contentInset.bottom;
     internalTextViewFrame.origin.x = contentInset.left;
-    NSLog(@"%@",NSStringFromCGRect(internalTextViewFrame));
+
     if(!CGRectEqualToRect(internalTextView.frame, internalTextViewFrame)) internalTextView.frame = internalTextViewFrame;
 }
 
