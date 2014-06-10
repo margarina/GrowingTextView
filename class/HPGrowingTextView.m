@@ -686,6 +686,24 @@
 	//weird 1 pixel bug when clicking backspace when textView is empty
 	if(![textView hasText] && [atext isEqualToString:@""]) return NO;
 	
+    if ([atext isEqualToString:@"@"])
+    {
+        NSString *characterJustBeforeAtext = [textView.text substringWithRange:(NSRange){range.location - 1, 1}];
+        BOOL isAtSymbolAtTheBeginning = [[textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""];
+        BOOL isAtSymbolAfterASpaceOrNewline = isAtSymbolAtTheBeginning
+        ? NO
+        : [characterJustBeforeAtext isEqualToString:@" "] ||
+          [characterJustBeforeAtext isEqualToString:@"\n"];
+        if (isAtSymbolAtTheBeginning || isAtSymbolAfterASpaceOrNewline)
+        {
+            if ([delegate respondsToSelector:@selector(growingTextViewDidPressMentionAtSymbol:)])
+            {
+                [delegate growingTextViewDidPressMentionAtSymbol:self];
+                return NO;
+            }
+        }
+    }
+    
 	//Added by bretdabaker: sometimes we want to handle this ourselves
     if ([delegate respondsToSelector:@selector(growingTextView:shouldChangeTextInRange:replacementText:)])
         return [delegate growingTextView:self shouldChangeTextInRange:range replacementText:atext];
@@ -702,8 +720,6 @@
 	}
 	
 	return YES;
-	
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
