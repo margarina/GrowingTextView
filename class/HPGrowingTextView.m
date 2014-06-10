@@ -688,12 +688,13 @@
 	
     if ([atext isEqualToString:@"@"])
     {
-        NSString *characterJustBeforeAtext = [textView.text substringWithRange:(NSRange){range.location - 1, 1}];
-        BOOL isAtSymbolAtTheBeginning = [[textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""];
-        BOOL isAtSymbolAfterASpaceOrNewline = isAtSymbolAtTheBeginning
-        ? NO
-        : [characterJustBeforeAtext isEqualToString:@" "] ||
-          [characterJustBeforeAtext isEqualToString:@"\n"];
+        BOOL isAtSymbolAtTheBeginning = range.location == 0;
+        BOOL isAtSymbolAfterASpaceOrNewline = NO;
+        if (!isAtSymbolAtTheBeginning)
+        {
+            NSString *precedingCharacter = [textView.text substringWithRange:(NSRange){range.location - 1, 1}];
+            isAtSymbolAfterASpaceOrNewline = [precedingCharacter isEqualToString:@" "] || [precedingCharacter isEqualToString:@"\n"];
+        }
         if (isAtSymbolAtTheBeginning || isAtSymbolAfterASpaceOrNewline)
         {
             if ([delegate respondsToSelector:@selector(growingTextViewDidPressMentionAtSymbol:)])
