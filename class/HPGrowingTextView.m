@@ -28,6 +28,9 @@
 #import "HPGrowingTextView.h"
 #import "HPTextViewInternal.h"
 
+#define iOS8 ([self respondsToSelector:@selector(layoutMarginsDidChange)])
+#define iOS7 ([self respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)])
+
 @interface HPGrowingTextView(private)
 -(void)commonInitialiser;
 -(void)resizeTextView:(NSInteger)newSizeH;
@@ -333,11 +336,9 @@
         [internalTextView setNeedsDisplay];
     }
     
-    
-    // scroll to caret (needed on iOS7)
-    if ([self respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)])
+    if (iOS7)
     {
-        [self performSelector:@selector(resetScrollPositionForIOS7) withObject:nil afterDelay:0.1f];
+        [self performSelector:@selector(resetScrollPosition) withObject:nil afterDelay:0.1f];
     }
     
     // Tell the delegate that the text view changed
@@ -349,12 +350,12 @@
 // Code from apple developer forum - @Ram Greenberg
 - (CGFloat)measureHeight
 {
-    if ([self respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)])
+    if (iOS7)
     {
         CGRect frame = internalTextView.bounds;
         CGSize fudgeFactor;
         // The padding added around the text on iOS6 and iOS7 is different.
-        if ([self respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)]) {
+        if (iOS7) {
             fudgeFactor = CGSizeMake(10.0, 16.0);
         } else {
             fudgeFactor = CGSizeMake(16.0, 16.0);
@@ -389,14 +390,18 @@
     }
 }
 
-- (void)resetScrollPositionForIOS7
+- (void)resetScrollPosition
 {
+    // scroll to caret
     CGRect r = [internalTextView caretRectForPosition:internalTextView.selectedTextRange.end];
-    CGFloat caretY =  MAX(r.origin.y - internalTextView.frame.size.height + r.size.height + 8, 0);
+    CGFloat caretY =  MAX(r.origin.y - internalTextView.frame.size.height + r.size.height, 0);
+    if (iOS7 && !iOS8)
+    {
+        caretY += 8;
+    }
     if (internalTextView.contentOffset.y < caretY && r.origin.y != INFINITY)
     {
         internalTextView.contentOffset = CGPointMake(0, caretY);
-        
         BOOL scrollEnabled = internalTextView.scrollEnabled;
         internalTextView.scrollEnabled = !scrollEnabled;
         internalTextView.scrollEnabled = scrollEnabled;
@@ -415,16 +420,15 @@
     
     internalTextViewFrame.origin.y = contentInset.top - contentInset.bottom;
     internalTextViewFrame.origin.x = contentInset.left;
-
+    
     if(!CGRectEqualToRect(internalTextView.frame, internalTextViewFrame)) internalTextView.frame = internalTextViewFrame;
 }
 
 - (void)growDidStop
 {
-    // scroll to caret (needed on iOS7)
-    if ([self respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)])
+    if (iOS7)
     {
-        [self resetScrollPositionForIOS7];
+        [self resetScrollPosition];
     }
     
 	if ([delegate respondsToSelector:@selector(growingTextView:didChangeHeight:)]) {
